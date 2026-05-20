@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Pedido #{{ pedido.id }}</h1>
+<div class="grid two">
+<div class="card"><h3>Status: {{ pedido.status }}</h3><p>Mercado: {{ pedido.mercado.nome }}</p><p>Endereço: {{ pedido.endereco_entrega }}</p><p>Produtos: R$ {{ "%.2f"|format(pedido.valor_produtos) }}</p><p>Entrega: R$ {{ "%.2f"|format(pedido.taxa_entrega) }}</p><h2>Total: R$ {{ "%.2f"|format(pedido.valor_total) }}</h2><p>Código para entregar ao motoboy:</p><div class="code-box">{{ pedido.codigo_confirmacao }}</div>{% if pedido.entregador_id %}<a class="btn primary" href="{{ url_for('chat.chat_pedido', pedido_id=pedido.id) }}">Abrir chat</a>{% endif %}</div>
+<div class="card center"><h3>QR Code simulado</h3>{% if pedido.qr_code %}<img class="qr" src="{{ url_for('static', filename='uploads/' ~ pedido.qr_code) }}">{% endif %}</div>
+</div>
+<table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th></tr></thead><tbody>{% for item in pedido.itens %}<tr><td>{{ item.descricao }}</td><td>{{ item.quantidade }}</td><td>R$ {{ "%.2f"|format(item.subtotal) }}</td></tr>{% endfor %}</tbody></table>
+{% endblock %}

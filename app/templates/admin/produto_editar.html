@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Editar produto</h1>
+    <p>Mercado: {{ mercado.nome }}</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('admin.produtos_mercado', mercado_id=mercado.id) }}">Voltar</a>
+</div>
+
+<form class="form-grid card" method="post" enctype="multipart/form-data">
+  <label>Código</label>
+  <input name="codigo" value="{{ produto.codigo }}" required>
+
+  <label>Descrição</label>
+  <input name="descricao" value="{{ produto.descricao }}" required>
+
+  <label>Valor</label>
+  <input name="valor" type="number" step="0.01" value="{{ produto.valor }}" required>
+
+  <label>Peso kg</label>
+  <input name="peso_kg" type="number" step="0.01" value="{{ produto.peso_kg }}" required>
+
+  <label>Categoria</label>
+  <input name="categoria" value="{{ produto.categoria or '' }}">
+
+  <label>Estoque</label>
+  <input name="estoque" type="number" value="{{ produto.estoque }}">
+
+  <label>Trocar foto</label>
+  <input name="foto" type="file">
+
+  <button class="btn primary" type="submit">Salvar alterações</button>
+</form>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .modo-teste-bar {
+    background: #fff8eb;
+    border: 1px solid #ffd89b;
+    color: #8a4b00;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .entregador-sem-cadastro {
+    background: #fff8eb;
+    border: 1px solid #ffd89b;
+    color: #8a4b00;
+    border-radius: 16px;
+    padding: 16px;
+    margin: 18px 0;
+  }
+</style>
+
+{% if admin_modo_teste %}
+  <div class="modo-teste-bar">
+    <strong>Modo teste entregador ativo.</strong>
+    Você está logado como admin, visualizando a experiência do motoboy.
+    <a class="btn" href="{{ url_for('admin.sair_modo_teste') }}">Voltar ao admin</a>
+  </div>
+{% endif %}
+
+<h1>Painel do Entregador</h1>
+
+{% if admin_modo_teste and not entregador %}
+  <div class="entregador-sem-cadastro">
+    <h3>Nenhum entregador cadastrado ainda</h3>
+    <p>Você está no modo teste como admin. Para testar o fluxo completo de aceitar entrega, crie um entregador em <b>Admin &gt; Gerenciar entregadores</b>.</p>
+    <a class="btn primary" href="{{ url_for('admin.entregadores') }}">Criar entregador</a>
+  </div>
+{% endif %}
+
+<div class="grid four">
+  <div class="stat">
+    <b>{{ disponiveis|length }}</b>
+    <span>Disponíveis</span>
+  </div>
+
+  <div class="stat">
+    <b>{{ meus|length }}</b>
+    <span>Meus pedidos</span>
+  </div>
+
+  <div class="stat">
+    <b>{{ concluidos|length }}</b>
+    <span>Concluídos</span>
+  </div>
+
+  <div class="stat">
+    <b>R$ {{ "%.2f"|format(valor_total) }}</b>
+    <span>Taxas feitas</span>
+  </div>
+</div>
+
+<h2>Pedidos disponíveis</h2>
+
+<div class="grid two">
+{% for p in disponiveis %}
+  <div class="card">
+    <h3>Pedido #{{ p.id }}</h3>
+    <p>Cliente: {{ p.cliente.nome }}</p>
+    <p>Mercado: {{ p.mercado.nome }}</p>
+    <p>Peso: {{ p.peso_total }} kg · Taxa: R$ {{ "%.2f"|format(p.taxa_entrega) }}</p>
+    <a class="btn primary" href="{{ url_for('entregador.pedido', pedido_id=p.id) }}">Ver detalhes</a>
+  </div>
+{% else %}
+  <p>Nenhum pedido disponível.</p>
+{% endfor %}
+</div>
+
+<h2>Histórico</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Status</th>
+      <th>Total</th>
+      <th>Ação</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for p in meus %}
+      <tr>
+        <td>#{{ p.id }}</td>
+        <td>{{ p.status }}</td>
+        <td>R$ {{ "%.2f"|format(p.valor_total) }}</td>
+        <td><a href="{{ url_for('entregador.pedido', pedido_id=p.id) }}">Abrir</a></td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="4">Nenhum pedido no histórico.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

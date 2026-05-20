@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-card">
+  <h2>Recuperar senha por SMS</h2>
+
+  <p>Digite o número de telefone cadastrado. O sistema enviará um código por SMS para redefinir sua senha.</p>
+
+  <form method="post">
+    <label>Telefone cadastrado</label>
+    <input
+      id="telefone"
+      name="telefone"
+      placeholder="(35) 999999999"
+      inputmode="numeric"
+      maxlength="15"
+      required
+      oninput="formatarTelefone(this)"
+    >
+
+    <button class="btn primary" type="submit">Enviar código por SMS</button>
+  </form>
+
+  <p>
+    <a href="{{ url_for('auth.login') }}">Voltar para o login</a>
+  </p>
+
+  <div class="recovery-note">
+    <strong>SMS real:</strong>
+    configure as variáveis do Twilio no arquivo <b>.env</b>.
+    Se não configurar, o sistema mantém o modo teste e mostra o código na tela.
+  </div>
+</div>
+
+<style>
+  .recovery-note {
+    background: #e8f5ec;
+    border: 1px solid #9bd8b5;
+    color: #126b37;
+    border-radius: 14px;
+    padding: 12px;
+    margin-top: 16px;
+  }
+</style>
+
+<script>
+function apenasNumeros(valor) {
+  return valor.replace(/\D/g, "");
+}
+
+function formatarTelefone(input) {
+  let numeros = apenasNumeros(input.value);
+
+  if (numeros.length > 11) {
+    numeros = numeros.slice(0, 11);
+  }
+
+  if (numeros.length <= 2) {
+    input.value = numeros;
+    return;
+  }
+
+  const ddd = numeros.slice(0, 2);
+  const restante = numeros.slice(2);
+
+  input.value = `(${ddd}) ${restante}`;
+}
+</script>
+{% endblock %}

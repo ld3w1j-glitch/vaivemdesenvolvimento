@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-card">
+  <h2>Entrar</h2>
+
+  <div class="admin-access-box">
+    <strong>Acesso admin inicial</strong>
+    <p>Email: <b>admin@vaivem.com</b></p>
+    <p>Senha: <b>admin123</b></p>
+  </div>
+
+  <form method="post">
+    <label>Email ou telefone</label>
+    <input
+      id="login"
+      name="login"
+      placeholder="Digite seu email ou telefone"
+      required
+      oninput="formatarLoginTelefone(this)"
+    >
+
+    <label>Senha</label>
+    <input name="senha" type="password" required>
+
+    <button class="btn primary" type="submit">Entrar</button>
+  </form>
+
+  <p class="login-help">
+    Você pode entrar usando o email cadastrado ou o número de telefone.
+  </p>
+
+  <p>
+    <a href="{{ url_for('auth.recuperar_senha') }}">Esqueci minha senha</a>
+  </p>
+</div>
+
+<style>
+  .admin-access-box {
+    background: #e8f5ec;
+    border: 1px solid #9bd8b5;
+    color: #126b37;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .admin-access-box p {
+    margin: 6px 0;
+  }
+</style>
+
+<script>
+function apenasNumeros(valor) {
+  return valor.replace(/\D/g, "");
+}
+
+function formatarLoginTelefone(input) {
+  const valor = input.value;
+
+  if (valor.includes("@")) {
+    return;
+  }
+
+  let numeros = apenasNumeros(valor);
+
+  if (numeros.length > 11) {
+    numeros = numeros.slice(0, 11);
+  }
+
+  if (numeros.length <= 2) {
+    input.value = numeros;
+    return;
+  }
+
+  const ddd = numeros.slice(0, 2);
+  const restante = numeros.slice(2);
+
+  input.value = `(${ddd}) ${restante}`;
+}
+</script>
+{% endblock %}

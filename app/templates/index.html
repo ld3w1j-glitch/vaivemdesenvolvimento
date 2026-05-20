@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Mercados do bairro, comparação de preços e entrega local.</h1>
+  <p>Cliente compra, sistema compara, entregador aceita e finaliza com código.</p>
+  <a class="btn primary" href="{{ url_for('auth.login') }}">Entrar</a>
+  <a class="btn" href="{{ url_for('auth.cadastro') }}">Criar conta</a>
+</section>
+<div class="grid three">
+  <div class="card"><h3>Admin</h3><p>Cria mercados, produtos e entregadores.</p></div>
+  <div class="card"><h3>Cliente</h3><p>Compra pelo mapa e compara preços.</p></div>
+  <div class="card"><h3>Entregador</h3><p>Aceita pedidos, conversa e finaliza.</p></div>
+</div>
+{% endblock %}

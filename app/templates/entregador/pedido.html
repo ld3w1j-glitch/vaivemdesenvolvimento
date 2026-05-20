@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Pedido #{{ pedido.id }}</h1>
+<div class="grid two">
+<div class="card"><h3>Cliente</h3><p>{{ pedido.cliente.nome }}</p><p>{{ pedido.endereco_entrega }}</p><h3>Mercado</h3><p>{{ pedido.mercado.nome }}</p><p>{{ pedido.mercado.endereco }}</p><h3>Valores</h3><p>Mercadoria: R$ {{ "%.2f"|format(pedido.valor_produtos) }}</p><p>Taxa: R$ {{ "%.2f"|format(pedido.taxa_entrega) }}</p><p>Peso: {{ pedido.peso_total }} kg</p>{% if pedido.status == "aguardando_entregador" %}<form method="post" action="{{ url_for('entregador.aceitar', pedido_id=pedido.id) }}"><button class="btn primary" type="submit">Aceitar pedido</button></form>{% endif %}{% if pedido.entregador_id == entregador.id and pedido.status != "concluido" %}<a class="btn" href="{{ url_for('chat.chat_pedido', pedido_id=pedido.id) }}">Abrir chat</a><form method="post" action="{{ url_for('entregador.finalizar', pedido_id=pedido.id) }}"><label>Código fornecido pelo cliente</label><input name="codigo_confirmacao" required><button class="btn primary" type="submit">Finalizar entrega</button></form>{% endif %}</div>
+<div class="card"><h3>Produtos exigidos</h3>{% for item in pedido.itens %}<p>{{ item.quantidade }}x {{ item.descricao }} — R$ {{ "%.2f"|format(item.subtotal) }}</p>{% endfor %}</div>
+</div>
+{% endblock %}

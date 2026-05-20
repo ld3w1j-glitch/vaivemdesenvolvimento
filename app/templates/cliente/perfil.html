@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .perfil-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .perfil-foto-preview {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #e8f5ec;
+    border: 4px solid #1f8a4c;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    font-size: 44px;
+    margin-bottom: 12px;
+  }
+
+  .perfil-foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .cep-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .senha-regras {
+    background: #e8f5ec;
+    border: 1px solid #9bd8b5;
+    color: #126b37;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 12px;
+  }
+
+  .senha-regras ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+  }
+
+  .senha-status {
+    display: block;
+    font-weight: 800;
+    margin-top: 6px;
+  }
+
+  .senha-status.fraca {
+    color: #b42318;
+  }
+
+  .senha-status.forte {
+    color: #126b37;
+  }
+
+  @media (max-width: 900px) {
+    .perfil-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .cep-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="page-head">
+  <div>
+    <h1>Meu perfil</h1>
+    <p>Edite seus dados, foto, endereço e senha.</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('cliente.dashboard') }}">Voltar</a>
+</div>
+
+<div class="perfil-layout">
+  <form class="form-grid card" method="post" enctype="multipart/form-data">
+    <h3>Dados do perfil</h3>
+
+    <input type="hidden" name="acao" value="dados_perfil">
+
+    <div class="perfil-foto-preview">
+      {% if current_user.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ current_user.foto) }}" alt="Foto do perfil">
+      {% else %}
+        👤
+      {% endif %}
+    </div>
+
+    <label>Foto do perfil</label>
+    <input name="foto" type="file" accept="image/*">
+
+    <label>Nome</label>
+    <input name="nome" value="{{ current_user.nome }}" required>
+
+    <label>Email</label>
+    <input name="email" type="email" value="{{ current_user.email }}" required>
+
+    <label>Telefone</label>
+    <input
+      id="telefone"
+      name="telefone"
+      value="{{ current_user.telefone or '' }}"
+      inputmode="numeric"
+      maxlength="15"
+      placeholder="(35) 999999999"
+      oninput="formatarTelefone(this)"
+    >
+
+    <h3>Endereço</h3>
+
+    <label>CEP</label>
+    <div class="cep-row">
+      <input id="cep" name="cep" placeholder="Digite o CEP" maxlength="9" oninput="formatarCep(this)">
+      <button class="btn" type="button" onclick="buscarCep()">Buscar CEP</button>
+    </div>
+
+    <small id="cep-status" class="senha-status"></small>
+
+    <label>Rua</label>
+    <input id="rua" name="rua" placeholder="Rua">
+
+    <label>Número</label>
+    <input id="numero" name="numero" placeholder="Número da casa">
+
+    <label>Bairro</label>
+    <input id="bairro" name="bairro" placeholder="Bairro">
+
+    <label>Cidade</label>
+    <input id="cidade" name="cidade" placeholder="Cidade">
+
+    <label>Estado</label>
+    <input id="estado" name="estado" placeholder="UF" maxlength="2">
+
+    <label>Complemento</label>
+    <input id="complemento" name="complemento" placeholder="Apartamento, referência, bloco, etc.">
+
+    <label>Endereço atual / manual</label>
+    <input name="endereco_manual" value="{{ current_user.endereco or '' }}">
+
+    <button class="btn primary" type="submit">Salvar perfil</button>
+  </form>
+
+  <form class="form-grid card" method="post">
+    <h3>Alterar senha</h3>
+
+    <input type="hidden" name="acao" value="alterar_senha">
+
+    <div class="senha-regras">
+      <strong>Regra de segurança da senha</strong>
+      <ul>
+        <li>Mínimo de 8 caracteres</li>
+        <li>Pelo menos 1 letra maiúscula</li>
+        <li>Pelo menos 1 letra minúscula</li>
+        <li>Pelo menos 1 número</li>
+        <li>Pelo menos 1 caractere especial, como @, #, ! ou *</li>
+      </ul>
+    </div>
+
+    <label>Senha atual</label>
+    <input name="senha_atual" type="password" required>
+
+    <label>Nova senha</label>
+    <input id="nova_senha" name="nova_senha" type="password" required oninput="validarSenhaVisual()">
+
+    <small id="senha-status" class="senha-status"></small>
+
+    <label>Confirmar nova senha</label>
+    <input name="confirmar_senha" type="password" required>
+
+    <button class="btn primary" type="submit">Alterar senha</button>
+  </form>
+</div>
+
+<script>
+function apenasNumeros(valor) {
+  return valor.replace(/\D/g, "");
+}
+
+function formatarTelefone(input) {
+  let numeros = apenasNumeros(input.value);
+
+  if (numeros.length > 11) {
+    numeros = numeros.slice(0, 11);
+  }
+
+  if (numeros.length <= 2) {
+    input.value = numeros;
+    return;
+  }
+
+  const ddd = numeros.slice(0, 2);
+  const restante = numeros.slice(2);
+
+  input.value = `(${ddd}) ${restante}`;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  const telefone = document.getElementById("telefone");
+  if (telefone && telefone.value) {
+    formatarTelefone(telefone);
+  }
+});
+
+function formatarCep(input) {
+  let cep = apenasNumeros(input.value);
+
+  if (cep.length > 8) {
+    cep = cep.slice(0, 8);
+  }
+
+  if (cep.length > 5) {
+    input.value = cep.slice(0, 5) + "-" + cep.slice(5);
+  } else {
+    input.value = cep;
+  }
+
+  if (cep.length === 8) {
+    buscarCep();
+  }
+}
+
+async function buscarCep() {
+  const cepInput = document.getElementById("cep");
+  const status = document.getElementById("cep-status");
+  const cep = apenasNumeros(cepInput.value);
+
+  if (cep.length !== 8) {
+    status.textContent = "Digite um CEP válido com 8 números.";
+    status.className = "senha-status fraca";
+    return;
+  }
+
+  status.textContent = "Buscando endereço...";
+  status.className = "senha-status forte";
+
+  try {
+    const resposta = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const dados = await resposta.json();
+
+    if (dados.erro) {
+      status.textContent = "CEP não encontrado. Preencha manualmente.";
+      status.className = "senha-status fraca";
+      return;
+    }
+
+    document.getElementById("rua").value = dados.logradouro || "";
+    document.getElementById("bairro").value = dados.bairro || "";
+    document.getElementById("cidade").value = dados.localidade || "";
+    document.getElementById("estado").value = dados.uf || "";
+
+    status.textContent = "Endereço carregado pelo CEP.";
+    status.className = "senha-status forte";
+
+    document.getElementById("numero").focus();
+  } catch (erro) {
+    status.textContent = "Não foi possível buscar o CEP agora. Preencha manualmente.";
+    status.className = "senha-status fraca";
+  }
+}
+
+function validarSenhaVisual() {
+  const senha = document.getElementById("nova_senha").value;
+  const status = document.getElementById("senha-status");
+  const erros = [];
+
+  if (senha.length < 8) erros.push("8 caracteres");
+  if (!/[A-Z]/.test(senha)) erros.push("letra maiúscula");
+  if (!/[a-z]/.test(senha)) erros.push("letra minúscula");
+  if (!/[0-9]/.test(senha)) erros.push("número");
+  if (!/[!@#$%¨&*()\-_=+\[\]{};:,.<>?\/\\|]/.test(senha)) erros.push("caractere especial");
+
+  if (!senha) {
+    status.textContent = "";
+    return;
+  }
+
+  if (erros.length === 0) {
+    status.textContent = "Senha forte.";
+    status.className = "senha-status forte";
+  } else {
+    status.textContent = "Falta: " + erros.join(", ") + ".";
+    status.className = "senha-status fraca";
+  }
+}
+</script>
+{% endblock %}

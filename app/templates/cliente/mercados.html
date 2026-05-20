@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .market-button {
+    border-left: 6px solid transparent !important;
+  }
+
+  .market-color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+
+<h1>Mercados da região</h1>
+
+<div class="map-layout">
+  <aside class="market-list">
+    {% for m in mercados %}
+      <button
+        class="market-button"
+        data-lat="{{ m.latitude }}"
+        data-lng="{{ m.longitude }}"
+        data-id="{{ m.id }}"
+        style="border-left-color: {{ m.cor_primaria or '#1f8a4c' }} !important; background: {{ m.cor_secundaria or '#ffffff' }};"
+      >
+        <b>
+          <span class="market-color-dot" style="background: {{ m.cor_ponteiro or '#1f8a4c' }};"></span>
+          {{ m.nome }}
+        </b>
+        <span>{{ m.endereco }}</span>
+      </button>
+    {% endfor %}
+  </aside>
+
+  <div id="map"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const mercados = [
+{% for m in mercados %}
+  {
+    id: {{ m.id }},
+    nome: {{ m.nome|tojson }},
+    endereco: {{ m.endereco|tojson }},
+    telefone: {{ m.telefone|tojson }},
+    horario: {{ m.horario|tojson }},
+    lat: {{ m.latitude }},
+    lng: {{ m.longitude }},
+    url: {{ url_for('cliente.mercado_catalogo', mercado_id=m.id)|tojson }},
+    corPrimaria: {{ (m.cor_primaria or '#1f8a4c')|tojson }},
+    corSecundaria: {{ (m.cor_secundaria or '#e8f5ec')|tojson }},
+    corPonteiro: {{ (m.cor_ponteiro or '#1f8a4c')|tojson }},
+    fotoPerfil: {% if m.foto_perfil %}{{ url_for('static', filename='uploads/' ~ m.foto_perfil)|tojson }}{% else %}null{% endif %},
+    fotoApresentacao: {% if m.foto_apresentacao %}{{ url_for('static', filename='uploads/' ~ m.foto_apresentacao)|tojson }}{% else %}null{% endif %}
+  },
+{% endfor %}
+];
+
+initMarketMap(mercados);
+</script>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Carrinho</h1>
+{% if comparacoes %}
+<div class="alert warning"><h3>Encontramos produtos mais baratos em outros mercados</h3>
+{% for c in comparacoes %}<p>{{ c.atual.descricao }}: atual R$ {{ "%.2f"|format(c.atual.valor) }} — {{ c.alternativo.mercado.nome }} R$ {{ "%.2f"|format(c.alternativo.valor) }}</p>{% endfor %}
+</div>
+{% endif %}
+<table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th><th>Peso</th></tr></thead><tbody>
+{% for item in itens %}<tr><td>{{ item.produto.descricao }}</td><td>{{ item.qtd }}</td><td>R$ {{ "%.2f"|format(item.subtotal) }}</td><td>{{ "%.2f"|format(item.peso) }} kg</td></tr>{% endfor %}
+</tbody></table>
+<div class="summary card"><p>Produtos: <b>R$ {{ "%.2f"|format(valor_produtos) }}</b></p><p>Peso total: <b>{{ "%.2f"|format(peso_total) }} kg</b></p><p>Taxa: <b>R$ {{ "%.2f"|format(taxa) }}</b></p><h2>Total: R$ {{ "%.2f"|format(total) }}</h2></div>
+<form class="card" method="post" action="{{ url_for('cliente.finalizar_pedido') }}"><h3>Endereço de entrega</h3><input name="endereco_entrega" value="{{ current_user.endereco or '' }}" placeholder="Digite o endereço completo"><button class="btn primary" type="submit">Finalizar e gerar QR Code</button></form>
+{% endblock %}

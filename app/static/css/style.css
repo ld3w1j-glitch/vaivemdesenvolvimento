@@ -1,0 +1,213 @@
+:root{
+  --green:#1f8a4c;
+  --green-dark:#126b37;
+  --bg:#f4f8f5;
+  --card:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#dce7df;
+}
+
+*{box-sizing:border-box}
+html,body{max-width:100%;overflow-x:hidden}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text)}
+a{color:var(--green-dark);text-decoration:none}
+
+.topbar{
+  min-height:64px;
+  padding:14px 28px;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.brand{
+  font-size:22px;
+  font-weight:800;
+  color:var(--green-dark);
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+
+.topbar nav{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.user-pill{background:#e8f5ec;padding:8px 12px;border-radius:999px;color:var(--green-dark);font-size:14px}
+
+.container{width:min(1180px,calc(100% - 32px));margin:28px auto}
+
+.hero{background:linear-gradient(135deg,#e8f8ee,#fff);border:1px solid var(--border);border-radius:28px;padding:48px;box-shadow:0 12px 30px #0001}
+.hero h1{font-size:clamp(32px,5vw,56px);max-width:850px;margin:0 0 16px;color:var(--green-dark)}
+.hero p{font-size:20px;color:var(--muted)}
+
+.grid{display:grid;gap:18px;margin:22px 0}
+.grid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+.card,.auth-card,.product-card,.stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:20px;box-shadow:0 8px 22px #0000000a}
+.auth-card{max-width:460px;margin:40px auto}
+.form-grid,form{display:grid;gap:10px}
+label{font-weight:700;margin-top:6px}
+input,select,textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:12px;font-size:16px;background:#fff}
+
+.btn,button{
+  border:1px solid var(--green);
+  background:#fff;
+  color:var(--green-dark);
+  border-radius:12px;
+  padding:11px 16px;
+  font-weight:800;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  max-width:100%;
+  text-align:center;
+  line-height:1.25;
+  white-space:normal;
+}
+.btn.primary,button.primary{background:var(--green);color:#fff}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin:18px 0;
+}
+.actions .btn,.actions button{width:auto}
+
+.alert{padding:14px;border-radius:14px;border:1px solid var(--border);background:#fff;margin-bottom:10px}
+.alert.success{border-color:#9bd8b5;background:#ecfff3}
+.alert.danger{border-color:#ffb4ab;color:#b42318}
+.alert.warning{border-color:#ffd89b;color:#a15c00;background:#fff8eb}
+
+.stat b{display:block;font-size:28px;color:var(--green-dark)}
+.stat span{color:var(--muted)}
+.page-head,.client-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.profile{display:flex;align-items:center;gap:14px}
+.avatar{width:64px;height:64px;display:grid;place-items:center;background:#e8f5ec;border-radius:50%;font-size:32px}
+
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;margin:18px 0}
+th,td{padding:13px;border-bottom:1px solid var(--border);text-align:left;vertical-align:top}
+th{background:#e8f5ec;color:var(--green-dark)}
+
+.map-layout{display:grid;grid-template-columns:320px minmax(0,1fr);gap:18px;min-height:620px}
+.market-list{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:14px;overflow:auto;max-height:620px}
+.market-button{width:100%;margin-bottom:10px;background:#fff;border:1px solid var(--border);justify-content:flex-start;align-items:flex-start;text-align:left;display:grid;color:var(--text)}
+.market-button span{color:var(--muted);font-weight:400}
+#map{min-height:620px;border-radius:20px;border:1px solid var(--border);overflow:hidden}
+
+.product-card{display:grid;gap:10px}
+.product-img{min-height:130px;background:#e8f5ec;border-radius:16px;display:grid;place-items:center;font-size:48px;overflow:hidden}
+.summary{max-width:440px;margin-left:auto}
+.code-box{font-size:36px;letter-spacing:6px;background:#e8f5ec;color:var(--green-dark);border-radius:16px;padding:18px;text-align:center;font-weight:900}
+.center{text-align:center}
+.qr{max-width:260px;width:100%}
+.chat-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:18px;min-height:420px;display:grid;gap:12px;align-content:start}
+.message{width:min(620px,85%);background:#f2f4f3;border-radius:18px;padding:12px}
+.message.me{margin-left:auto;background:#e8f5ec}
+.message small{display:block;color:var(--muted)}
+.chat-form{margin-top:14px;display:grid;grid-template-columns:1fr 240px auto;gap:10px}
+
+@media(max-width:900px){
+  .grid.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid.three{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .map-layout{grid-template-columns:1fr}
+}
+
+@media(max-width:640px){
+  .topbar{
+    padding:12px 16px;
+    align-items:flex-start;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .brand{
+    width:100%;
+    font-size:21px;
+    line-height:1.2;
+  }
+
+  .brand-logo-img{flex:0 0 auto}
+  .topbar nav{width:100%;gap:8px}
+  .user-pill{font-size:14px;padding:7px 10px}
+
+  .container{
+    width:100%;
+    margin:16px auto;
+    padding:0 12px;
+  }
+
+  h1{font-size:25px;line-height:1.2;margin:14px 0}
+  h2{font-size:22px;line-height:1.25}
+
+  .hero{padding:24px;border-radius:22px}
+  .hero p{font-size:17px}
+
+  .grid,
+  .grid.two,
+  .grid.three,
+  .grid.four{
+    grid-template-columns:1fr;
+    gap:12px;
+    margin:14px 0;
+  }
+
+  .stat,.card,.auth-card,.product-card{
+    border-radius:18px;
+    padding:16px;
+  }
+
+  .stat b{font-size:26px}
+
+  .actions{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:8px;
+    margin:14px 0;
+  }
+
+  .actions .btn,
+  .actions button,
+  .btn,
+  button{
+    width:100%;
+    min-height:44px;
+    padding:10px 12px;
+  }
+
+  .admin-test-panel{
+    margin:16px 0 !important;
+    padding:16px !important;
+    border-radius:18px !important;
+  }
+
+  .clientes-table-wrap{
+    width:100%;
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  table{
+    min-width:680px;
+    margin:12px 0;
+    font-size:14px;
+  }
+
+  th,td{padding:10px}
+
+  #map{min-height:420px}
+  .market-list{max-height:none}
+  .chat-form{grid-template-columns:1fr}
+  .summary{max-width:none;margin-left:0}
+}

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}{{ config_site.nome_site if config_site else 'VaiVem Mercado' }}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  {% if config_site and config_site.icone_site %}
+    <link rel="icon" href="{{ url_for('static', filename='uploads/' ~ config_site.icone_site) }}">
+  {% endif %}
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+  <style>
+    :root {
+      --green: {{ config_site.cor_principal if config_site else '#1f8a4c' }};
+      --green-dark: {{ config_site.cor_principal if config_site else '#126b37' }};
+      --bg: #f4f8f5;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #dce7df;
+    }
+
+    .brand-logo-img {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      object-fit: cover;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+  </style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="{{ url_for('auth.index') }}">
+    {% if config_site and config_site.logo_site %}
+      <img class="brand-logo-img" src="{{ url_for('static', filename='uploads/' ~ config_site.logo_site) }}" alt="Logo">
+    {% else %}
+      ☀️
+    {% endif %}
+    {{ config_site.nome_site if config_site else 'VaiVem Mercado' }}
+  </a>
+
+  <nav>
+    {% if current_user.is_authenticated %}
+      <span class="user-pill">{{ current_user.nome }} · {{ current_user.tipo }}</span>
+      <a href="{{ url_for('auth.logout') }}">Sair</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}">Entrar</a>
+      <a href="{{ url_for('auth.cadastro') }}">Cadastro</a>
+    {% endif %}
+  </nav>
+</header>
+
+<main class="container">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="alerts">
+      {% for category, message in messages %}
+        <div class="alert {{ category }}">{{ message }}</div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

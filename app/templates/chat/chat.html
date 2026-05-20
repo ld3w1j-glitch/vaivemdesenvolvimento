@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Chat do pedido #{{ pedido.id }}</h1>
+<div class="chat-box">
+{% for msg in mensagens %}
+<div class="message {% if msg.remetente_id == current_user.id %}me{% endif %}"><b>{{ msg.remetente.nome }}</b><p>{{ msg.mensagem }}</p>{% if msg.anexo %}<a href="{{ url_for('static', filename='uploads/' ~ msg.anexo) }}" target="_blank">Ver anexo</a>{% endif %}<small>{{ msg.criado_em.strftime("%d/%m/%Y %H:%M") }}</small></div>
+{% else %}<p>Nenhuma mensagem ainda.</p>{% endfor %}
+</div>
+<form class="chat-form" method="post" enctype="multipart/form-data"><input name="mensagem" placeholder="Digite sua mensagem"><input name="anexo" type="file"><button class="btn primary" type="submit">Enviar</button></form>
+{% endblock %}

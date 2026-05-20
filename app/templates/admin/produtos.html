@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+  .produtos-table .acoes-produto {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+    width: auto !important;
+    min-width: 180px !important;
+  }
+
+  .produtos-table .acoes-produto form {
+    display: inline-flex !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+  }
+
+  .produtos-table .acoes-produto .btn-acao-produto {
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 10px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    line-height: 1 !important;
+  }
+
+  .produtos-table .acoes-produto .btn-excluir-produto {
+    border-color: #b42318 !important;
+    color: #b42318 !important;
+    background: #fff !important;
+  }
+
+  .produtos-table .acoes-produto .btn-excluir-produto:hover {
+    background: #ffe8e5 !important;
+  }
+</style>
+
+<div class="page-head">
+  <div>
+    <h1>Produtos — {{ mercado.nome }}</h1>
+    <p>Cadastre, edite ou exclua produtos deste mercado.</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('admin.mercados') }}">Voltar aos mercados</a>
+</div>
+
+<form class="form-grid card" method="post" enctype="multipart/form-data">
+  <h3>Adicionar produto</h3>
+
+  <label>Código</label>
+  <input name="codigo" required>
+
+  <label>Descrição</label>
+  <input name="descricao" required>
+
+  <label>Valor</label>
+  <input name="valor" type="number" step="0.01" required>
+
+  <label>Peso kg</label>
+  <input name="peso_kg" type="number" step="0.01" required>
+
+  <label>Categoria</label>
+  <input name="categoria">
+
+  <label>Estoque</label>
+  <input name="estoque" type="number" value="0">
+
+  <label>Foto</label>
+  <input name="foto" type="file">
+
+  <button class="btn primary" type="submit">Adicionar</button>
+</form>
+
+<table class="produtos-table">
+  <thead>
+    <tr>
+      <th>Código</th>
+      <th>Descrição</th>
+      <th>Valor</th>
+      <th>Peso</th>
+      <th>Estoque</th>
+      <th style="width: 190px;">Ações</th>
+    </tr>
+  </thead>
+
+  <tbody>
+  {% for p in produtos %}
+    <tr>
+      <td>{{ p.codigo }}</td>
+      <td>{{ p.descricao }}</td>
+      <td>R$ {{ "%.2f"|format(p.valor) }}</td>
+      <td>{{ p.peso_kg }} kg</td>
+      <td>{{ p.estoque }}</td>
+
+      <td>
+        <div class="acoes-produto">
+          <a class="btn btn-acao-produto" href="{{ url_for('admin.editar_produto', produto_id=p.id) }}">
+            Editar
+          </a>
+
+          <form method="post" action="{{ url_for('admin.excluir_produto', produto_id=p.id) }}" onsubmit="return confirmarExclusaoProduto('{{ p.descricao|e }}', this);">
+            <input type="hidden" name="admin_password" value="">
+            <button class="btn btn-acao-produto btn-excluir-produto" type="submit">
+              Excluir
+            </button>
+          </form>
+        </div>
+      </td>
+    </tr>
+  {% else %}
+    <tr>
+      <td colspan="6">Nenhum produto cadastrado neste mercado.</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function confirmarExclusaoProduto(nomeProduto, form) {
+  const certeza = confirm(
+    "Tem certeza que deseja excluir o produto: " + nomeProduto + "?\n\nEsta ação não poderá ser desfeita."
+  );
+
+  if (!certeza) {
+    return false;
+  }
+
+  const senha = prompt("Digite a senha do administrador para confirmar a exclusão:");
+
+  if (senha === null) {
+    return false;
+  }
+
+  if (senha.trim() === "") {
+    alert("A senha do administrador é obrigatória para excluir.");
+    return false;
+  }
+
+  form.querySelector('input[name="admin_password"]').value = senha;
+  return true;
+}
+</script>
+{% endblock %}

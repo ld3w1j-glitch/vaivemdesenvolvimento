@@ -1,0 +1,38 @@
+/* Botões Editar / Excluir compactos e proporcionais */
+.product-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.product-actions .btn,
+.product-actions button {
+  width: 86px;
+  min-width: 86px;
+  height: 38px;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.delete-product-form {
+  display: inline-flex;
+  margin: 0;
+  padding: 0;
+  width: auto;
+}
+
+.btn.danger {
+  border-color: #b42318;
+  color: #b42318;
+  background: #fff;
+}
+
+.btn.danger:hover {
+  background: #ffe8e5;
+}

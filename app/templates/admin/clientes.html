@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .cliente-avatar-mini {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e8f5ec;
+    display: inline-grid;
+    place-items: center;
+    overflow: hidden;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  .cliente-avatar-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inline-form {
+    display: inline-flex;
+    margin: 0;
+    padding: 0;
+  }
+
+  .btn.danger {
+    border-color: #b42318;
+    color: #b42318;
+    background: #fff;
+  }
+
+  .btn.danger:hover {
+    background: #ffe8e5;
+  }
+
+  .btn.small {
+    min-width: 112px;
+    height: 36px;
+    padding: 0 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+  }
+
+  .senha-help {
+    background: #e8f5ec;
+    border: 1px solid #9bd8b5;
+    color: #126b37;
+    border-radius: 14px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+</style>
+
+<div class="page-head">
+  <div>
+    <h1>Clientes cadastrados</h1>
+    <p>Visualize, exclua clientes e altere senha de usuários quando necessário.</p>
+  </div>
+
+  <a class="btn" href="{{ url_for('admin.dashboard') }}">Voltar ao painel</a>
+</div>
+
+<div class="senha-help">
+  <strong>Regra para alterar senha:</strong>
+  mínimo de 8 caracteres, letra maiúscula, letra minúscula, número e caractere especial.
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Email</th>
+        <th>Telefone</th>
+        <th>Endereço</th>
+        <th>Data de cadastro</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for c in clientes %}
+        <tr>
+          <td>
+            <span class="cliente-avatar-mini">
+              {% if c.foto %}
+                <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}">
+              {% else %}
+                👤
+              {% endif %}
+            </span>
+            {{ c.nome }}
+          </td>
+          <td>{{ c.email }}</td>
+          <td>{{ c.telefone or "-" }}</td>
+          <td>{{ c.endereco or "-" }}</td>
+          <td>{{ c.criado_em.strftime("%d/%m/%Y %H:%M") if c.criado_em else "-" }}</td>
+          <td>
+            <div class="actions-cell">
+              <form
+                class="inline-form"
+                method="post"
+                action="{{ url_for('admin.alterar_senha_usuario', usuario_id=c.id) }}"
+                onsubmit="return confirmarAlteracaoSenhaUsuario('{{ c.nome|e }}', this);"
+              >
+                <input type="hidden" name="nova_senha" value="">
+                <input type="hidden" name="confirmar_senha" value="">
+                <input type="hidden" name="admin_password" value="">
+                <button class="btn small" type="submit">Alterar senha</button>
+              </form>
+
+              <form
+                class="inline-form"
+                method="post"
+                action="{{ url_for('admin.excluir_cliente', cliente_id=c.id) }}"
+                onsubmit="return confirmarExclusaoCliente('{{ c.nome|e }}', this);"
+              >
+                <input type="hidden" name="admin_password" value="">
+                <button class="btn small danger" type="submit">Excluir</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% else %}
+        <tr>
+          <td colspan="6">Nenhum cliente cadastrado.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<script>
+function senhaForte(senha) {
+  const erros = [];
+
+  if (senha.length < 8) erros.push("8 caracteres");
+  if (!/[A-Z]/.test(senha)) erros.push("letra maiúscula");
+  if (!/[a-z]/.test(senha)) erros.push("letra minúscula");
+  if (!/[0-9]/.test(senha)) erros.push("número");
+  if (!/[!@#$%¨&*()\-_=+\[\]{};:,.<>?\/\\|]/.test(senha)) erros.push("caractere especial");
+
+  return erros;
+}
+
+function confirmarAlteracaoSenhaUsuario(nomeUsuario, form) {
+  const certeza = confirm(
+    "Deseja alterar a senha do usuário: " + nomeUsuario + "?"
+  );
+
+  if (!certeza) {
+    return false;
+  }
+
+  const novaSenha = prompt("Digite a nova senha do usuário:");
+
+  if (novaSenha === null) {
+    return false;
+  }
+
+  const erros = senhaForte(novaSenha);
+
+  if (erros.length > 0) {
+    alert("A nova senha precisa conter: " + erros.join(", ") + ".");
+    return false;
+  }
+
+  const confirmarSenha = prompt("Confirme a nova senha:");
+
+  if (confirmarSenha === null) {
+    return false;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    alert("A nova senha e a confirmação não conferem.");
+    return false;
+  }
+
+  const senhaAdmin = prompt("Digite a senha do administrador para confirmar:");
+
+  if (senhaAdmin === null) {
+    return false;
+  }
+
+  if (senhaAdmin.trim() === "") {
+    alert("A senha do administrador é obrigatória.");
+    return false;
+  }
+
+  form.querySelector('input[name="nova_senha"]').value = novaSenha;
+  form.querySelector('input[name="confirmar_senha"]').value = confirmarSenha;
+  form.querySelector('input[name="admin_password"]').value = senhaAdmin;
+
+  return true;
+}
+
+function confirmarExclusaoCliente(nomeCliente, form) {
+  const certeza = confirm(
+    "Tem certeza que deseja excluir o cliente: " + nomeCliente + "?\n\nEsta ação não poderá ser desfeita se o cliente não tiver pedidos vinculados."
+  );
+
+  if (!certeza) {
+    return false;
+  }
+
+  const senha = prompt("Digite a senha do administrador para confirmar a exclusão:");
+
+  if (senha === null) {
+    return false;
+  }
+
+  if (senha.trim() === "") {
+    alert("A senha do administrador é obrigatória para excluir.");
+    return false;
+  }
+
+  form.querySelector('input[name="admin_password"]').value = senha;
+  return true;
+}
+</script>
+{% endblock %}

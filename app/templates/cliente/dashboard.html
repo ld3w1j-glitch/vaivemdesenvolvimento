@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .modo-teste-bar {
+    background: #fff8eb;
+    border: 1px solid #ffd89b;
+    color: #8a4b00;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .cliente-home-mercados {
+    margin-top: 28px;
+  }
+
+  .cliente-mercados-page {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 18px;
+    min-height: 620px;
+  }
+
+  .cliente-mercados-sidebar {
+    background: #ffffff;
+    border: 1px solid #dce7df;
+    border-radius: 22px;
+    padding: 16px;
+    max-height: 620px;
+    overflow-y: auto;
+    box-shadow: 0 8px 22px rgba(0,0,0,.04);
+  }
+
+  .mercado-lista-btn {
+    width: 100%;
+    border: 1px solid #dce7df;
+    background: #fff;
+    border-left: 7px solid #1f8a4c;
+    color: #1f2937;
+    border-radius: 16px;
+    padding: 12px;
+    margin-bottom: 10px;
+    text-align: left;
+    display: grid;
+    gap: 6px;
+    cursor: pointer;
+    transition: .2s ease;
+  }
+
+  .mercado-lista-btn:hover,
+  .mercado-lista-btn.ativo {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(0,0,0,.08);
+    outline: 3px solid rgba(31,138,76,.18);
+  }
+
+  .mercado-lista-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mercado-lista-foto {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #e8f5ec;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    font-size: 22px;
+  }
+
+  .mercado-lista-foto img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mercado-lista-nome {
+    font-weight: 900;
+    font-size: 16px;
+  }
+
+  .mercado-lista-endereco,
+  .mercado-lista-extra {
+    font-size: 13px;
+    color: #6b7280;
+  }
+
+  .cliente-mapa-wrapper {
+    background: #ffffff;
+    border: 1px solid #dce7df;
+    border-radius: 22px;
+    padding: 12px;
+    box-shadow: 0 8px 22px rgba(0,0,0,.04);
+  }
+
+  #map {
+    width: 100%;
+    height: 596px;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .leaflet-popup-content-wrapper {
+    border-radius: 22px !important;
+    padding: 0 !important;
+    overflow: hidden;
+    box-shadow: 0 16px 35px rgba(0,0,0,.20) !important;
+  }
+
+  .leaflet-popup-content {
+    margin: 0 !important;
+    width: 320px !important;
+  }
+
+  .leaflet-popup-tip {
+    background: #ffffff !important;
+    box-shadow: 0 8px 20px rgba(0,0,0,.12) !important;
+  }
+
+  .market-popup-card {
+    background: #ffffff;
+  }
+
+  .market-popup-cover {
+    height: 122px;
+    background: #f4f8f5;
+    overflow: hidden;
+  }
+
+  .market-popup-cover img,
+  .popup-capa-placeholder {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .popup-capa-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 18px;
+    font-size: 22px;
+    font-weight: 900;
+    text-align: center;
+  }
+
+  .market-popup-body {
+    padding: 16px;
+  }
+
+  .market-popup-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: -42px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .market-popup-avatar {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background: #fff;
+    border: 4px solid #1f8a4c;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    font-size: 34px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.16);
+  }
+
+  .market-popup-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .market-popup-main {
+    display: grid;
+    gap: 6px;
+    padding-top: 38px;
+    min-width: 0;
+  }
+
+  .market-popup-main h3 {
+    margin: 0;
+    font-size: 22px;
+    line-height: 1.1;
+  }
+
+  .market-popup-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  .market-popup-info {
+    display: grid;
+    gap: 10px;
+    margin-top: 16px;
+    color: #334155;
+  }
+
+  .popup-line {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .popup-icon {
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .market-popup-btn {
+    display: block;
+    width: 100%;
+    margin-top: 18px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff !important;
+    font-weight: 900;
+    padding: 12px 14px;
+    border-radius: 14px;
+    transition: .2s ease;
+    box-shadow: 0 8px 18px rgba(0,0,0,.14);
+  }
+
+  .market-popup-btn:hover {
+    transform: translateY(-1px);
+    opacity: .96;
+  }
+
+  @media (max-width: 900px) {
+    .cliente-mercados-page {
+      grid-template-columns: 1fr;
+    }
+
+    #map {
+      height: 520px;
+    }
+  }
+</style>
+
+{% set usuario_tela = cliente_visual if cliente_visual is defined else current_user %}
+
+{% if admin_modo_teste %}
+  <div class="modo-teste-bar">
+    <strong>Modo teste cliente ativo.</strong>
+    Você está logado como admin, visualizando a experiência do cliente.
+    <a class="btn" href="{{ url_for('admin.sair_modo_teste') }}">Voltar ao admin</a>
+  </div>
+{% endif %}
+
+<div class="client-head">
+  <div class="profile">
+    <div class="avatar">
+      {% if usuario_tela.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ usuario_tela.foto) }}" alt="Foto do perfil" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+      {% else %}
+        👤
+      {% endif %}
+    </div>
+
+    <div>
+      <h2>{{ usuario_tela.nome }}</h2>
+      <p>{{ usuario_tela.endereco or "Sem endereço cadastrado" }}</p>
+    </div>
+  </div>
+
+  <div class="actions">
+    {% if not admin_modo_teste %}
+      <a class="btn" href="{{ url_for('cliente.perfil') }}">Editar perfil</a>
+    {% endif %}
+    <a class="btn primary" href="#mercados-mapa">Mercados</a>
+    <a class="btn" href="#pedidos">Pedidos</a>
+  </div>
+</div>
+
+<section id="mercados-mapa" class="cliente-home-mercados">
+  <div class="page-head">
+    <div>
+      <h2>Mercados perto de você</h2>
+      <p>Escolha um mercado na lista ou clique no ponto do mapa para acessar os produtos.</p>
+    </div>
+  </div>
+
+  <div class="cliente-mercados-page">
+    <aside class="cliente-mercados-sidebar">
+      <h2>Mercados existentes</h2>
+      <p>Clique em um mercado para focar a localização no mapa.</p>
+
+      {% for m in mercados %}
+        <button
+          class="mercado-lista-btn"
+          data-id="{{ m.id }}"
+          data-lat="{{ m.latitude }}"
+          data-lng="{{ m.longitude }}"
+          style="border-left-color: {{ m.cor_primaria or '#1f8a4c' }}; background: {{ m.cor_secundaria or '#ffffff' }};"
+        >
+          <div class="mercado-lista-topo">
+            <div class="mercado-lista-foto" style="border: 3px solid {{ m.cor_primaria or '#1f8a4c' }};">
+              {% if m.foto_perfil %}
+                <img src="{{ url_for('static', filename='uploads/' ~ m.foto_perfil) }}" alt="Foto do mercado">
+              {% else %}
+                🏪
+              {% endif %}
+            </div>
+
+            <div>
+              <div class="mercado-lista-nome" style="color: {{ m.cor_primaria or '#1f8a4c' }};">
+                {{ m.nome }}
+              </div>
+              <div class="mercado-lista-extra">
+                {{ m.horario or "Horário não informado" }}
+              </div>
+            </div>
+          </div>
+
+          <div class="mercado-lista-endereco">{{ m.endereco }}</div>
+          <div class="mercado-lista-extra">{{ m.telefone or "Telefone não informado" }}</div>
+        </button>
+      {% else %}
+        <p>Nenhum mercado cadastrado ainda.</p>
+      {% endfor %}
+    </aside>
+
+    <section class="cliente-mapa-wrapper">
+      <div id="map"></div>
+    </section>
+  </div>
+</section>
+
+<h2 id="pedidos">Meus pedidos</h2>
+
+<div class="grid two">
+{% for p in pedidos %}
+  <div class="card">
+    <h3>Pedido #{{ p.id }}</h3>
+    <p>{{ p.mercado.nome }} · {{ p.status }}</p>
+    <p>Total: R$ {{ "%.2f"|format(p.valor_total) }}</p>
+
+    <a class="btn" href="{{ url_for('cliente.pedido', pedido_id=p.id) }}">Ver pedido</a>
+
+    {% if p.entregador_id %}
+      <a class="btn" href="{{ url_for('chat.chat_pedido', pedido_id=p.id) }}">Chat</a>
+    {% endif %}
+  </div>
+{% else %}
+  <p>Você ainda não fez pedidos.</p>
+{% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const mercados = [
+{% for m in mercados %}
+  {
+    id: {{ m.id }},
+    nome: {{ m.nome|tojson }},
+    endereco: {{ m.endereco|tojson }},
+    telefone: {{ m.telefone|tojson }},
+    horario: {{ m.horario|tojson }},
+    lat: {{ m.latitude }},
+    lng: {{ m.longitude }},
+    url: {{ url_for('cliente.mercado_catalogo', mercado_id=m.id)|tojson }},
+    corPrimaria: {{ (m.cor_primaria or '#1f8a4c')|tojson }},
+    corSecundaria: {{ (m.cor_secundaria or '#e8f5ec')|tojson }},
+    corPonteiro: {{ (m.cor_ponteiro or '#1f8a4c')|tojson }},
+    fotoPerfil: {% if m.foto_perfil %}{{ url_for('static', filename='uploads/' ~ m.foto_perfil)|tojson }}{% else %}null{% endif %},
+    fotoApresentacao: {% if m.foto_apresentacao %}{{ url_for('static', filename='uploads/' ~ m.foto_apresentacao)|tojson }}{% else %}null{% endif %}
+  },
+{% endfor %}
+];
+
+initMarketMap(mercados);
+</script>
+{% endblock %}

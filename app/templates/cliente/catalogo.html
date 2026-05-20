@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .mercado-catalogo-header {
+    border-radius: 24px;
+    overflow: hidden;
+    background: {{ mercado.cor_secundaria or '#e8f5ec' }};
+    border: 1px solid #dce7df;
+    margin-bottom: 22px;
+  }
+
+  .mercado-catalogo-capa {
+    height: 220px;
+    display: grid;
+    place-items: center;
+    color: {{ mercado.cor_primaria or '#1f8a4c' }};
+    font-size: 28px;
+    font-weight: 900;
+  }
+
+  .mercado-catalogo-capa img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mercado-catalogo-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    background: #fff;
+  }
+
+  .mercado-catalogo-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: {{ mercado.cor_secundaria or '#e8f5ec' }};
+    display: grid;
+    place-items: center;
+    font-size: 34px;
+    border: 4px solid {{ mercado.cor_primaria or '#1f8a4c' }};
+    flex-shrink: 0;
+  }
+
+  .mercado-catalogo-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mercado-catalogo-info h1 {
+    color: {{ mercado.cor_primaria or '#1f8a4c' }};
+    margin: 0;
+  }
+
+  .btn-mercado {
+    background: {{ mercado.cor_primaria or '#1f8a4c' }} !important;
+    border-color: {{ mercado.cor_primaria or '#1f8a4c' }} !important;
+    color: #fff !important;
+  }
+</style>
+
+<div class="mercado-catalogo-header">
+  <div class="mercado-catalogo-capa">
+    {% if mercado.foto_apresentacao %}
+      <img src="{{ url_for('static', filename='uploads/' ~ mercado.foto_apresentacao) }}" alt="Foto de apresentação">
+    {% else %}
+      {{ mercado.nome }}
+    {% endif %}
+  </div>
+
+  <div class="mercado-catalogo-info">
+    <div class="mercado-catalogo-avatar">
+      {% if mercado.foto_perfil %}
+        <img src="{{ url_for('static', filename='uploads/' ~ mercado.foto_perfil) }}" alt="Foto do perfil">
+      {% else %}
+        🏪
+      {% endif %}
+    </div>
+
+    <div>
+      <h1>{{ mercado.nome }}</h1>
+      <p>{{ mercado.endereco }}</p>
+      <p>{{ mercado.telefone or "" }} · {{ mercado.horario or "" }}</p>
+    </div>
+
+    <div style="margin-left:auto;">
+      <a class="btn btn-mercado" href="{{ url_for('cliente.carrinho') }}">Ver carrinho</a>
+    </div>
+  </div>
+</div>
+
+<div class="grid three">
+{% for p in produtos %}
+  <div class="product-card">
+    <div class="product-img">
+      {% if p.foto %}
+        <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}">
+      {% else %}
+        🛒
+      {% endif %}
+    </div>
+
+    <h3>{{ p.descricao }}</h3>
+    <p>Código: {{ p.codigo }}</p>
+    <p>Peso: {{ p.peso_kg }} kg</p>
+    <strong>R$ {{ "%.2f"|format(p.valor) }}</strong>
+
+    <form method="post" action="{{ url_for('cliente.carrinho_add', produto_id=p.id) }}">
+      <input name="quantidade" type="number" value="1" min="1">
+      <button class="btn btn-mercado" type="submit">Adicionar</button>
+    </form>
+  </div>
+{% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Pedidos</h1>
+<table><thead><tr><th>ID</th><th>Cliente</th><th>Mercado</th><th>Total</th><th>Status</th></tr></thead><tbody>
+{% for p in pedidos %}
+<tr><td>#{{ p.id }}</td><td>{{ p.cliente.nome }}</td><td>{{ p.mercado.nome }}</td><td>R$ {{ "%.2f"|format(p.valor_total) }}</td><td>{{ p.status }}</td></tr>
+{% endfor %}
+</tbody></table>
+{% endblock %}

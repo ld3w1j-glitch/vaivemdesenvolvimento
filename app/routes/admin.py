@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required, current_user
 from app import db
-from app.models import Mercado, Produto, Usuario, Entregador, Pedido, TaxaEntrega, ConfiguracaoSite
+from app.models import Mercado, Produto, Usuario, Entregador, Pedido, PedidoItem, ChatMensagem, TaxaEntrega, ConfiguracaoSite
 from app.utils import salvar_upload, obter_taxas_padrao
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -72,6 +72,8 @@ def obter_taxas_entrega_configuradas():
 def dashboard():
     clientes = Usuario.query.filter_by(tipo="cliente").order_by(Usuario.id.desc()).all()
     entregadores_lista = Entregador.query.all()
+    pedidos_recentes = Pedido.query.order_by(Pedido.id.desc()).limit(5).all()
+    faturamento_total = sum((p.valor_total or 0) for p in Pedido.query.all())
 
     return render_template(
         "admin/dashboard.html",
@@ -79,6 +81,8 @@ def dashboard():
         produtos=Produto.query.count(),
         entregadores=Entregador.query.count(),
         pedidos=Pedido.query.count(),
+        pedidos_recentes=pedidos_recentes,
+        faturamento_total=faturamento_total,
         clientes_count=len(clientes),
         clientes=clientes,
         entregadores_lista=entregadores_lista
@@ -459,3 +463,54 @@ def entregadores():
 @login_required
 def pedidos():
     return render_template("admin/pedidos.html", pedidos=Pedido.query.order_by(Pedido.id.desc()).all())
+
+@admin_bp.route("/pedidos/<int:pedido_id>/excluir", methods=["POST"])
+@login_required
+def excluir_pedido(pedido_id):
+    pedido = Pedido.query.get_or_404(pedido_id)
+    senha_admin = request.form.get("admin_password", "")
+
+    if not senha_admin:
+        flash("Informe a senha do administrador para excluir o pedido.", "danger")
+        return redirect(url_for("admin.pedidos"))
+
+    if not current_user.check_senha(senha_admin):
+        flash("Senha do administrador incorreta. Pedido não excluído.", "danger")
+        return redirect(url_for("admin.pedidos"))
+
+    try:
+        ChatMensagem.query.filter_by(pedido_id=pedido.id).delete()
+        PedidoItem.query.filter_by(pedido_id=pedido.id).delete()
+        db.session.delete(pedido)
+        db.session.commit()
+        flash(f"Pedido #{pedido_id} excluído com sucesso.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Não foi possível excluir este pedido.", "danger")
+
+    return redirect(url_for("admin.pedidos"))
+
+@admin_bp.route("/pedidos/limpar", methods=["POST"])
+@login_required
+def limpar_pedidos():
+    senha_admin = request.form.get("admin_password", "")
+
+    if not senha_admin:
+        flash("Informe a senha do administrador para limpar os pedidos.", "danger")
+        return redirect(url_for("admin.pedidos"))
+
+    if not current_user.check_senha(senha_admin):
+        flash("Senha do administrador incorreta. Histórico de pedidos não foi limpo.", "danger")
+        return redirect(url_for("admin.pedidos"))
+
+    try:
+        ChatMensagem.query.delete()
+        PedidoItem.query.delete()
+        Pedido.query.delete()
+        db.session.commit()
+        flash("Histórico de pedidos limpo com sucesso.", "success")
+    except Exception:
+        db.session.rollback()
+        flash("Não foi possível limpar o histórico de pedidos.", "danger")
+
+    return redirect(url_for("admin.pedidos"))

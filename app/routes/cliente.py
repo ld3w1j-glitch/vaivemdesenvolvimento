@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from flask_login import login_required, current_user
 from app import db
 from app.models import Mercado, Produto, Pedido, PedidoItem, Usuario
-from app.utils import calcular_taxa_entrega, gerar_codigo_confirmacao, gerar_qrcode_pedido, salvar_upload
+from app.utils import calcular_taxa_entrega, gerar_codigo_confirmacao, gerar_qrcode_pedido, obter_pix_copia_cola_pedido, salvar_upload
 
 try:
     from app.utils import comparacao_precos_ativa
@@ -196,9 +196,69 @@ def mercados():
 @login_required
 def mercado_catalogo(mercado_id):
     mercado = Mercado.query.get_or_404(mercado_id)
-    produtos = Produto.query.filter_by(mercado_id=mercado_id).all()
+    categoria_ativa = request.args.get("categoria", "").strip()
+
+    categorias_produtos = [
+        {
+            "nome": "Padaria",
+            "slug": "Padaria",
+            "descricao": "Pães, bolos e lanches",
+            "imagem": "pao.png",
+            "icone": "bread",
+        },
+        {
+            "nome": "Carnes",
+            "slug": "Carnes",
+            "descricao": "Cortes frescos e açougue",
+            "imagem": "carne.png",
+            "icone": "meat",
+        },
+        {
+            "nome": "Hortifruti",
+            "slug": "Hortifruti",
+            "descricao": "Frutas, legumes e verduras",
+            "imagem": "tomate.png",
+            "icone": "leaf",
+        },
+        {
+            "nome": "Entrega",
+            "slug": "Entrega",
+            "descricao": "Acompanhe e receba seu pedido",
+            "imagem": "capacete.png",
+            "icone": "delivery",
+        },
+        {
+            "nome": "Promoções",
+            "slug": "Promoções",
+            "descricao": "Ofertas e descontos especiais",
+            "imagem": "dinheiro-50.png",
+            "icone": "percent",
+        },
+        {
+            "nome": "Economia",
+            "slug": "Economia",
+            "descricao": "Preços baixos e vantagens",
+            "imagem": "dinheiro-100.png",
+            "icone": "wallet",
+        },
+    ]
+
+    consulta = Produto.query.filter_by(mercado_id=mercado_id)
+
+    if categoria_ativa:
+        consulta = consulta.filter(Produto.categoria.ilike(f"%{categoria_ativa}%"))
+
+    produtos = consulta.order_by(Produto.descricao.asc()).all()
     carrinho = session.get("carrinho", {})
-    return render_template("cliente/catalogo.html", mercado=mercado, produtos=produtos, carrinho=carrinho)
+
+    return render_template(
+        "cliente/catalogo.html",
+        mercado=mercado,
+        produtos=produtos,
+        carrinho=carrinho,
+        categorias_produtos=categorias_produtos,
+        categoria_ativa=categoria_ativa
+    )
 
 @cliente_bp.route("/carrinho/add/<int:produto_id>", methods=["POST"])
 @login_required
@@ -329,7 +389,7 @@ def finalizar_pedido():
 
     session["carrinho"] = {}
 
-    flash("Pedido criado. QR Code gerado e pedido liberado para entregadores.", "success")
+    flash("Pedido criado. QR Code Pix gerado e pedido liberado para entregadores.", "success")
     return redirect(url_for("cliente.pedido", pedido_id=pedido.id))
 
 @cliente_bp.route("/pedido/<int:pedido_id>")
@@ -341,4 +401,6 @@ def pedido(pedido_id):
         flash("Pedido não pertence a você.", "danger")
         return redirect(url_for("cliente.dashboard"))
 
-    return render_template("cliente/pedido.html", pedido=pedido)
+    pix_copia_cola = obter_pix_copia_cola_pedido(pedido)
+
+    return render_template("cliente/pedido.html", pedido=pedido, pix_copia_cola=pix_copia_cola)

@@ -1,0 +1,28 @@
+ALTERAÇÃO: Categorias ilustradas no catálogo do cliente
+
+Copie a pasta "app" deste ZIP para dentro da raiz do seu projeto VaiVem-entregas-main.
+Quando perguntar se deseja substituir arquivos, confirme.
+
+Arquivos alterados:
+- app/routes/cliente.py
+- app/templates/cliente/catalogo.html
+- app/static/css/style.css
+
+Arquivos adicionados:
+- app/static/img/mascotes/pao.png
+- app/static/img/mascotes/carne.png
+- app/static/img/mascotes/tomate.png
+- app/static/img/mascotes/capacete.png
+- app/static/img/mascotes/dinheiro-50.png
+- app/static/img/mascotes/dinheiro-100.png
+- app/static/img/decor/folhas...
+
+Observação:
+As categorias filtram os produtos pelo campo "categoria" cadastrado no produto.
+Exemplos de categorias para cadastrar no admin:
+- Padaria
+- Carnes
+- Hortifruti
+- Entrega
+- Promoções
+- Economia

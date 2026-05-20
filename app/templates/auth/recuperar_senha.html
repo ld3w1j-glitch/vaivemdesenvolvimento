@@ -1,33 +1,41 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="auth-card">
-  <h2>Recuperar senha por SMS</h2>
+<div class="auth-illustrated-layout">
+  <aside class="auth-floating-mascot">
+    <img src="{{ url_for('static', filename='img/mascotes/formulario.png') }}" alt="Formulário VaiVem">
+    <span class="auth-side-pill">Recuperação de acesso</span>
+    <p class="auth-floating-note">Digite o telefone ao lado para receber o código e redefinir sua senha.</p>
+  </aside>
 
-  <p>Digite o número de telefone cadastrado. O sistema enviará um código por SMS para redefinir sua senha.</p>
+  <div class="auth-card">
+    <h2>Recuperar senha por SMS</h2>
 
-  <form method="post">
-    <label>Telefone cadastrado</label>
-    <input
-      id="telefone"
-      name="telefone"
-      placeholder="(35) 999999999"
-      inputmode="numeric"
-      maxlength="15"
-      required
-      oninput="formatarTelefone(this)"
-    >
+    <p>Digite o número de telefone cadastrado. O sistema enviará um código por SMS para redefinir sua senha.</p>
 
-    <button class="btn primary" type="submit">Enviar código por SMS</button>
-  </form>
+    <form method="post">
+      <label>Telefone cadastrado</label>
+      <input
+        id="telefone"
+        name="telefone"
+        placeholder="(35) 999999999"
+        inputmode="numeric"
+        maxlength="15"
+        required
+        oninput="formatarTelefone(this)"
+      >
 
-  <p>
-    <a href="{{ url_for('auth.login') }}">Voltar para o login</a>
-  </p>
+      <button class="btn primary" type="submit">Enviar código por SMS</button>
+    </form>
 
-  <div class="recovery-note">
-    <strong>SMS real:</strong>
-    configure as variáveis do Twilio no arquivo <b>.env</b>.
-    Se não configurar, o sistema mantém o modo teste e mostra o código na tela.
+    <p>
+      <a href="{{ url_for('auth.login') }}">Voltar para o login</a>
+    </p>
+
+    <div class="recovery-note">
+      <strong>SMS real:</strong>
+      configure as variáveis do Twilio no arquivo <b>.env</b>.
+      Se não configurar, o sistema mantém o modo teste e mostra o código na tela.
+    </div>
   </div>
 </div>
 

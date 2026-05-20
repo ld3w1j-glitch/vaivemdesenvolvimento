@@ -1,9 +1,56 @@
 {% extends "base.html" %}
 {% block content %}
-<h1>Pedidos</h1>
-<table><thead><tr><th>ID</th><th>Cliente</th><th>Mercado</th><th>Total</th><th>Status</th></tr></thead><tbody>
-{% for p in pedidos %}
-<tr><td>#{{ p.id }}</td><td>{{ p.cliente.nome }}</td><td>{{ p.mercado.nome }}</td><td>R$ {{ "%.2f"|format(p.valor_total) }}</td><td>{{ p.status }}</td></tr>
-{% endfor %}
-</tbody></table>
+<div class="page-head">
+  <div>
+    <h1>Pedidos</h1>
+    <p class="muted">Gerencie os pedidos cadastrados no sistema.</p>
+  </div>
+</div>
+
+{% if pedidos %}
+<div class="card danger-zone">
+  <h2>Limpar histórico</h2>
+  <p class="muted">Use esta opção somente se quiser apagar todos os pedidos, itens e mensagens vinculadas.</p>
+  <form method="post" action="{{ url_for('admin.limpar_pedidos') }}" class="inline-delete-form" onsubmit="return confirm('Tem certeza que deseja apagar TODOS os pedidos? Esta ação não pode ser desfeita.');">
+    <input type="password" name="admin_password" placeholder="Senha do admin" required>
+    <button type="submit" class="danger-button">Limpar todos os pedidos</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Cliente</th>
+        <th>Mercado</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pedidos %}
+      <tr>
+        <td>#{{ p.id }}</td>
+        <td>{{ p.cliente.nome if p.cliente else '-' }}</td>
+        <td>{{ p.mercado.nome if p.mercado else '-' }}</td>
+        <td>R$ {{ "%.2f"|format(p.valor_total) }}</td>
+        <td>{{ p.status }}</td>
+        <td>
+          <form method="post" action="{{ url_for('admin.excluir_pedido', pedido_id=p.id) }}" class="inline-delete-form" onsubmit="return confirm('Deseja excluir o pedido #{{ p.id }}? Esta ação não pode ser desfeita.');">
+            <input type="password" name="admin_password" placeholder="Senha do admin" required>
+            <button type="submit" class="danger-button">Excluir</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6">Nenhum pedido cadastrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

@@ -93,27 +93,91 @@
   </div>
 </div>
 
-<div class="grid three">
-{% for p in produtos %}
-  <div class="product-card">
-    <div class="product-img">
-      {% if p.foto %}
-        <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}">
-      {% else %}
-        🛒
-      {% endif %}
-    </div>
+<section class="category-decoration-shell">
+  <img class="decor-leaf decor-leaf-a" src="{{ url_for('static', filename='img/decor/folha-verde-carvalho.png') }}" alt="" aria-hidden="true">
+  <img class="decor-leaf decor-leaf-b" src="{{ url_for('static', filename='img/decor/folha-amarela.png') }}" alt="" aria-hidden="true">
+  <img class="decor-leaf decor-leaf-c" src="{{ url_for('static', filename='img/decor/folha-laranja-maple.png') }}" alt="" aria-hidden="true">
+  <img class="decor-leaf decor-leaf-d" src="{{ url_for('static', filename='img/decor/folha-verde.png') }}" alt="" aria-hidden="true">
 
-    <h3>{{ p.descricao }}</h3>
-    <p>Código: {{ p.codigo }}</p>
-    <p>Peso: {{ p.peso_kg }} kg</p>
-    <strong>R$ {{ "%.2f"|format(p.valor) }}</strong>
-
-    <form method="post" action="{{ url_for('cliente.carrinho_add', produto_id=p.id) }}">
-      <input name="quantidade" type="number" value="1" min="1">
-      <button class="btn btn-mercado" type="submit">Adicionar</button>
-    </form>
+  <div class="category-title-area">
+    <span class="eyebrow">Categorias do mercado</span>
+    <h2>Categorias de produtos</h2>
+    <p>Escolha uma categoria para explorar os itens do mercado.</p>
   </div>
-{% endfor %}
+
+  <div class="category-card-grid">
+    {% for cat in categorias_produtos %}
+      <a class="category-card-vv {% if categoria_ativa == cat.slug %}active{% endif %}" href="{{ url_for('cliente.mercado_catalogo', mercado_id=mercado.id, categoria=cat.slug) }}">
+        <span class="coolicon category-icon" aria-hidden="true">
+          {% if cat.icone == 'bread' %}
+            <svg viewBox="0 0 24 24"><path d="M6 10.5c0-3.6 2.8-6.5 6.3-6.5S18 6.9 18 10.5V20H6z"/><path d="M9 8.5c.8-.7 1.8-1.1 3-1.1"/></svg>
+          {% elif cat.icone == 'meat' %}
+            <svg viewBox="0 0 24 24"><path d="M5.5 12.5c0-4.2 3.4-7.5 7.6-7.5 3.4 0 5.9 2.3 5.9 5.2 0 5.1-5.7 8.8-10.1 8.8-2.1 0-3.4-1.3-3.4-3.2z"/><path d="M12 9.5h.01"/><path d="M9 14c2 1 4.5.8 6.5-.5"/></svg>
+          {% elif cat.icone == 'leaf' %}
+            <svg viewBox="0 0 24 24"><path d="M20 4C12 4 5 8.5 5 15.5c0 2.5 1.8 4.5 4.4 4.5C16 20 20 12.8 20 4z"/><path d="M5 20c3.2-5.1 7.3-8.3 12.5-10"/></svg>
+          {% elif cat.icone == 'delivery' %}
+            <svg viewBox="0 0 24 24"><path d="M3 7h11v10H3z"/><path d="M14 10h3l3 3v4h-6z"/><path d="M7 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M17 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
+          {% elif cat.icone == 'percent' %}
+            <svg viewBox="0 0 24 24"><path d="M19 5 5 19"/><path d="M7.5 8.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M16.5 19.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/></svg>
+          {% else %}
+            <svg viewBox="0 0 24 24"><path d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M8 8V6a4 4 0 0 1 8 0v2"/><path d="M4 12h16"/></svg>
+          {% endif %}
+        </span>
+        <img src="{{ url_for('static', filename='img/mascotes/' ~ cat.imagem) }}" alt="Categoria {{ cat.nome }}">
+        <strong>{{ cat.nome }}</strong>
+        <small>{{ cat.descricao }}</small>
+      </a>
+    {% endfor %}
+  </div>
+
+  {% if categoria_ativa %}
+    <div class="category-filter-bar">
+      <span>Filtro ativo: <b>{{ categoria_ativa }}</b></span>
+      <a class="btn" href="{{ url_for('cliente.mercado_catalogo', mercado_id=mercado.id) }}">Ver todos os produtos</a>
+    </div>
+  {% endif %}
+</section>
+
+<div class="section-headline">
+  <div>
+    <h2>{% if categoria_ativa %}Produtos em {{ categoria_ativa }}{% else %}Todos os produtos{% endif %}</h2>
+    <p class="muted">Adicione os produtos desejados ao carrinho.</p>
+  </div>
 </div>
+
+{% if produtos %}
+  <div class="grid three">
+  {% for p in produtos %}
+    <div class="product-card">
+      <div class="product-img">
+        {% if p.foto %}
+          <img src="{{ url_for('static', filename='uploads/' ~ p.foto) }}">
+        {% else %}
+          🛒
+        {% endif %}
+      </div>
+
+      <h3>{{ p.descricao }}</h3>
+      <p>Código: {{ p.codigo }}</p>
+      {% if p.categoria %}<p>Categoria: {{ p.categoria }}</p>{% endif %}
+      <p>Peso: {{ p.peso_kg }} kg</p>
+      <strong>R$ {{ "%.2f"|format(p.valor) }}</strong>
+
+      <form method="post" action="{{ url_for('cliente.carrinho_add', produto_id=p.id) }}">
+        <input name="quantidade" type="number" value="1" min="1">
+        <button class="btn btn-mercado" type="submit">Adicionar</button>
+      </form>
+    </div>
+  {% endfor %}
+  </div>
+{% else %}
+  <div class="card empty-category-card">
+    <img src="{{ url_for('static', filename='img/mascotes/sacola-vaivem.png') }}" alt="VaiVem Mercado">
+    <div>
+      <h3>Nenhum produto encontrado nessa categoria.</h3>
+      <p class="muted">Cadastre produtos com a categoria <b>{{ categoria_ativa }}</b> no painel do admin ou veja todos os produtos.</p>
+      <a class="btn btn-mercado" href="{{ url_for('cliente.mercado_catalogo', mercado_id=mercado.id) }}">Ver todos os produtos</a>
+    </div>
+  </div>
+{% endif %}
 {% endblock %}

@@ -1,9 +1,75 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Pedido #{{ pedido.id }}</h1>
+
 <div class="grid two">
-<div class="card"><h3>Status: {{ pedido.status }}</h3><p>Mercado: {{ pedido.mercado.nome }}</p><p>Endereço: {{ pedido.endereco_entrega }}</p><p>Produtos: R$ {{ "%.2f"|format(pedido.valor_produtos) }}</p><p>Entrega: R$ {{ "%.2f"|format(pedido.taxa_entrega) }}</p><h2>Total: R$ {{ "%.2f"|format(pedido.valor_total) }}</h2><p>Código para entregar ao motoboy:</p><div class="code-box">{{ pedido.codigo_confirmacao }}</div>{% if pedido.entregador_id %}<a class="btn primary" href="{{ url_for('chat.chat_pedido', pedido_id=pedido.id) }}">Abrir chat</a>{% endif %}</div>
-<div class="card center"><h3>QR Code simulado</h3>{% if pedido.qr_code %}<img class="qr" src="{{ url_for('static', filename='uploads/' ~ pedido.qr_code) }}">{% endif %}</div>
+  <div class="card">
+    <h3>Status: {{ pedido.status }}</h3>
+    <p>Mercado: {{ pedido.mercado.nome }}</p>
+    <p>Endereço: {{ pedido.endereco_entrega }}</p>
+    <p>Produtos: R$ {{ "%.2f"|format(pedido.valor_produtos) }}</p>
+    <p>Entrega: R$ {{ "%.2f"|format(pedido.taxa_entrega) }}</p>
+    <h2>Total: R$ {{ "%.2f"|format(pedido.valor_total) }}</h2>
+    <p>Código para entregar ao motoboy:</p>
+    <div class="code-box">{{ pedido.codigo_confirmacao }}</div>
+    {% if pedido.entregador_id %}
+      <a class="btn primary" href="{{ url_for('chat.chat_pedido', pedido_id=pedido.id) }}">Abrir chat</a>
+    {% endif %}
+  </div>
+
+  <div class="card center pix-card">
+    <h3>Pagamento Pix</h3>
+
+    {% if pedido.qr_code and pix_copia_cola %}
+      <img class="qr" src="{{ url_for('static', filename='uploads/' ~ pedido.qr_code) }}" alt="QR Code Pix do pedido {{ pedido.id }}">
+      <p class="muted">Escaneie pelo app do banco ou copie o Pix abaixo.</p>
+
+      <textarea id="pixCopiaCola" class="pix-copy-text" readonly>{{ pix_copia_cola }}</textarea>
+      <button type="button" class="btn primary" onclick="copiarPix()">Copiar Pix copia e cola</button>
+      <small id="pixCopyFeedback" class="muted"></small>
+    {% else %}
+      <div class="alert warning">
+        Pix ainda não configurado. O admin precisa preencher a <strong>Chave Pix</strong>, o <strong>Nome do recebedor</strong> e a <strong>Cidade do recebedor</strong> em Configurações.
+      </div>
+    {% endif %}
+  </div>
 </div>
-<table><thead><tr><th>Produto</th><th>Qtd</th><th>Subtotal</th></tr></thead><tbody>{% for item in pedido.itens %}<tr><td>{{ item.descricao }}</td><td>{{ item.quantidade }}</td><td>R$ {{ "%.2f"|format(item.subtotal) }}</td></tr>{% endfor %}</tbody></table>
+
+<table>
+  <thead>
+    <tr>
+      <th>Produto</th>
+      <th>Qtd</th>
+      <th>Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in pedido.itens %}
+      <tr>
+        <td>{{ item.descricao }}</td>
+        <td>{{ item.quantidade }}</td>
+        <td>R$ {{ "%.2f"|format(item.subtotal) }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function copiarPix() {
+  const campo = document.getElementById('pixCopiaCola');
+  const feedback = document.getElementById('pixCopyFeedback');
+
+  if (!campo) return;
+
+  campo.select();
+  campo.setSelectionRange(0, 99999);
+
+  navigator.clipboard.writeText(campo.value).then(() => {
+    feedback.textContent = 'Pix copiado com sucesso.';
+  }).catch(() => {
+    document.execCommand('copy');
+    feedback.textContent = 'Pix copiado.';
+  });
+}
+</script>
 {% endblock %}

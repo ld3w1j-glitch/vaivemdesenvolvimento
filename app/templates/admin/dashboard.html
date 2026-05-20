@@ -1,126 +1,204 @@
 {% extends "base.html" %}
 {% block content %}
-<style>
-  .admin-test-panel {
-    background: #e8f5ec;
-    border: 1px solid #9bd8b5;
-    color: #126b37;
-    border-radius: 18px;
-    padding: 16px;
-    margin: 18px 0;
-  }
+<section class="admin-illustrated-shell">
+  <div class="admin-hero-illustrated">
+    <div class="admin-hero-copy">
+      <span class="eyebrow">Painel do administrador</span>
+      <h1>Bem-vindo de volta! 👋</h1>
+      <p>Tudo pronto para mais um dia de boas vendas, pedidos organizados e clientes felizes.</p>
 
-  .clientes-table-wrap {
-    overflow-x: auto;
-  }
+      <div class="hero-mini-stats">
+        <div>
+          <strong>{{ pedidos }}</strong>
+          <span>Pedidos registrados</span>
+        </div>
+        <div>
+          <strong>R$ {{ "%.2f"|format(faturamento_total or 0) }}</strong>
+          <span>Faturamento geral</span>
+        </div>
+      </div>
+    </div>
 
-  .cliente-avatar-mini {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #e8f5ec;
-    display: inline-grid;
-    place-items: center;
-    overflow: hidden;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
+    <img class="hero-mascot" src="{{ url_for('static', filename='img/mascotes/sacola-vaivem.png') }}" alt="VaiVem Mercado">
 
-  .cliente-avatar-mini img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-</style>
-
-<h1>Painel do Administrador</h1>
-
-<div class="grid four">
-  <div class="stat">
-    <b>{{ mercados }}</b>
-    <span>Mercados</span>
+    <div class="daily-tip-card">
+      <div class="tip-icon">⭐</div>
+      <h3>Dica do dia</h3>
+      <p>Mantenha seus produtos sempre atualizados para melhorar a experiência dos clientes.</p>
+      <a class="btn" href="{{ url_for('admin.mercados') }}">Ver produtos</a>
+    </div>
   </div>
 
-  <div class="stat">
-    <b>{{ produtos }}</b>
-    <span>Produtos</span>
+  <div class="dashboard-actions-grid">
+    <a class="action-tile" href="{{ url_for('admin.mercados') }}">
+      <span>🏪</span>
+      <strong>Mercados</strong>
+      <small>{{ mercados }} cadastrados</small>
+    </a>
+    <a class="action-tile" href="{{ url_for('admin.mercados') }}">
+      <span>📦</span>
+      <strong>Produtos</strong>
+      <small>{{ produtos }} no catálogo</small>
+    </a>
+    <a class="action-tile" href="{{ url_for('admin.pedidos') }}">
+      <span>🧾</span>
+      <strong>Pedidos</strong>
+      <small>Ver, acompanhar e remover</small>
+    </a>
+    <a class="action-tile" href="{{ url_for('admin.clientes') }}">
+      <span>👥</span>
+      <strong>Clientes</strong>
+      <small>{{ clientes_count }} cadastrados</small>
+    </a>
+    <a class="action-tile" href="{{ url_for('admin.entregadores') }}">
+      <span>🏍️</span>
+      <strong>Entregadores</strong>
+      <small>{{ entregadores }} disponíveis</small>
+    </a>
+    <a class="action-tile" href="{{ url_for('admin.configuracoes') }}">
+      <span>⚙️</span>
+      <strong>Configurações</strong>
+      <small>Logo, Pix, cores e mapa</small>
+    </a>
   </div>
 
-  <div class="stat">
-    <b>{{ entregadores }}</b>
-    <span>Entregadores</span>
+  <div class="grid two illustrated-panels">
+    <section class="card feature-card">
+      <div class="section-headline">
+        <div>
+          <span class="eyebrow">Categorias em destaque</span>
+          <h2>Categorias em destaque</h2>
+        </div>
+      </div>
+
+      <div class="mascot-category-grid">
+        <div class="mascot-category-card yellow">
+          <img src="{{ url_for('static', filename='img/mascotes/bolacha.png') }}" alt="Biscoitos">
+          <div>
+            <strong>Biscoitos</strong>
+            <span>Produtos rápidos de encontrar</span>
+          </div>
+        </div>
+
+        <div class="mascot-category-card orange">
+          <img src="{{ url_for('static', filename='img/mascotes/pao.png') }}" alt="Padaria">
+          <div>
+            <strong>Padaria</strong>
+            <span>Pães, bolos e produtos frescos</span>
+          </div>
+        </div>
+
+        <div class="mascot-category-card greenish">
+          <img src="{{ url_for('static', filename='img/mascotes/suco.png') }}" alt="Bebidas">
+          <div>
+            <strong>Bebidas</strong>
+            <span>Sucos, refrigerantes e bebidas</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card orders-card">
+      <div class="section-headline">
+        <div>
+          <span class="eyebrow">Movimento</span>
+          <h2>Pedidos recentes</h2>
+        </div>
+        <a href="{{ url_for('admin.pedidos') }}">Ver todos</a>
+      </div>
+
+      <div class="mini-table-list">
+        {% for p in pedidos_recentes %}
+          <div class="mini-table-row">
+            <strong>#{{ p.id }}</strong>
+            <span>{{ p.cliente.nome if p.cliente else 'Cliente' }}</span>
+            <span>R$ {{ "%.2f"|format(p.valor_total or 0) }}</span>
+            <em>{{ p.status.replace('_', ' ') if p.status else 'pendente' }}</em>
+          </div>
+        {% else %}
+          <div class="empty-state-soft">
+            <img src="{{ url_for('static', filename='img/mascotes/sacola-vaivem.png') }}" alt="VaiVem Mercado">
+            <p>Nenhum pedido recente ainda.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
   </div>
 
-  <div class="stat">
-    <b>{{ pedidos }}</b>
-    <span>Pedidos</span>
+  <div class="grid two illustrated-panels">
+    <section class="card promo-illustrated">
+      <div>
+        <span class="eyebrow">Promoções ativas</span>
+        <h2>Super Sexta VaiVem</h2>
+        <p>Destaque ofertas, cupons e combos especiais para seus clientes.</p>
+        <a class="btn primary" href="{{ url_for('admin.mercados') }}">Criar oferta</a>
+      </div>
+      <img src="{{ url_for('static', filename='img/mascotes/bolacha.png') }}" alt="Promoção VaiVem">
+      <strong class="discount-badge">Até<br>40% OFF</strong>
+    </section>
+
+    <section class="card admin-test-panel illustrated-test-panel">
+      <div>
+        <span class="eyebrow">Modo teste de navegação</span>
+        <h2>Teste como cliente ou entregador</h2>
+        <p>Você continua logado como admin, mas consegue visualizar os caminhos principais do app.</p>
+      </div>
+
+      <div class="actions">
+        <a class="btn primary" href="{{ url_for('admin.modo_teste_cliente') }}">Testar área do cliente</a>
+        <a class="btn" href="{{ url_for('admin.modo_teste_entregador') }}">Testar área do entregador</a>
+        <a class="btn" href="{{ url_for('admin.sair_modo_teste') }}">Sair do modo teste</a>
+      </div>
+    </section>
   </div>
-</div>
 
-<div class="grid four">
-  <div class="stat">
-    <b>{{ clientes_count }}</b>
-    <span>Clientes</span>
-  </div>
-</div>
+  <section class="card">
+    <div class="section-headline">
+      <div>
+        <span class="eyebrow">Relacionamento</span>
+        <h2>Clientes recentes</h2>
+      </div>
+      <a href="{{ url_for('admin.clientes') }}">Ver clientes</a>
+    </div>
 
-<div class="actions">
-  <a class="btn primary" href="{{ url_for('admin.mercados') }}">Gerenciar mercados</a>
-  <a class="btn" href="{{ url_for('admin.entregadores') }}">Gerenciar entregadores</a>
-  <a class="btn" href="{{ url_for('admin.pedidos') }}">Ver pedidos</a>
-  <a class="btn" href="{{ url_for('admin.clientes') }}">Ver clientes</a>
-  <a class="btn" href="{{ url_for('admin.configuracoes') }}">Configurações do site</a>
-</div>
+    <div class="clientes-table-wrap table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Endereço</th>
+            <th>Pedidos</th>
+          </tr>
+        </thead>
 
-<div class="admin-test-panel">
-  <h2>Modo teste de navegação</h2>
-  <p>Use estes botões para testar as páginas de cliente e entregador sem sair da conta admin.</p>
-
-  <div class="actions">
-    <a class="btn primary" href="{{ url_for('admin.modo_teste_cliente') }}">Testar área do cliente</a>
-    <a class="btn" href="{{ url_for('admin.modo_teste_entregador') }}">Testar área do entregador/motoboy</a>
-    <a class="btn" href="{{ url_for('admin.sair_modo_teste') }}">Sair do modo teste</a>
-  </div>
-</div>
-
-<h2>Clientes recentes</h2>
-
-<div class="clientes-table-wrap">
-  <table>
-    <thead>
-      <tr>
-        <th>Cliente</th>
-        <th>Email</th>
-        <th>Telefone</th>
-        <th>Endereço</th>
-        <th>Pedidos</th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {% for c in clientes[:8] %}
-        <tr>
-          <td>
-            <span class="cliente-avatar-mini">
-              {% if c.foto %}
-                <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}">
-              {% else %}
-                👤
-              {% endif %}
-            </span>
-            {{ c.nome }}
-          </td>
-          <td>{{ c.email }}</td>
-          <td>{{ c.telefone or "-" }}</td>
-          <td>{{ c.endereco or "-" }}</td>
-          <td>{{ c.pedidos_count if c.pedidos_count is defined else "" }}</td>
-        </tr>
-      {% else %}
-        <tr>
-          <td colspan="5">Nenhum cliente cadastrado ainda.</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+        <tbody>
+          {% for c in clientes[:8] %}
+            <tr>
+              <td>
+                <span class="cliente-avatar-mini">
+                  {% if c.foto %}
+                    <img src="{{ url_for('static', filename='uploads/' ~ c.foto) }}">
+                  {% else %}
+                    👤
+                  {% endif %}
+                </span>
+                {{ c.nome }}
+              </td>
+              <td>{{ c.email }}</td>
+              <td>{{ c.telefone or "-" }}</td>
+              <td>{{ c.endereco or "-" }}</td>
+              <td>{{ c.pedidos_count if c.pedidos_count is defined else "" }}</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="5">Nenhum cliente cadastrado ainda.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>
 {% endblock %}
